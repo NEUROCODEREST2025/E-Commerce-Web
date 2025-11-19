@@ -1,0 +1,758 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rejay's Ultra Glow - Cosmetics</title>
+    
+    <!-- Load Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Google Fonts (Inter & Playfair Display) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@700;900&display=swap" rel="stylesheet">
+
+    <!-- NEW: Load Three.js (for 3D graphics) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+
+    <!-- Custom Tailwind Configuration -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'brand-primary': '#ff69b4', // Hot pink for buttons
+                        'brand-secondary': '#ffb6c1', // Medium pink
+                        'brand-light': '#fef1f5', // Very light pink background
+                        'brand-dark': '#333333',
+                        // Hexagon colors
+                        'hex-beige': '#F8E3C6',
+                        'hex-light-pink': '#F9E7EA',
+                        'hex-brown': '#DABDBA',
+                        'hex-dark-brown': '#B5979C',
+                        // 3D Theme Colors (from slider)
+                        'theme-soap-bg': '#fde6f0',
+                        'theme-soap-fg': '#f472b6',
+                        'theme-lotion-bg': '#e0f2fe',
+                        'theme-lotion-fg': '#38bdf8',
+                        'theme-serum-bg': '#fef3c7',
+                        'theme-serum-fg': '#f59e0b',
+                        'theme-cream-bg': '#ecfdf5',
+                        'theme-cream-fg': '#34d399',
+                    },
+                    fontFamily: {
+                        'sans': ['Inter', 'sans-serif'],
+                        'serif': ['Playfair Display', 'serif'],
+                    },
+                    fontWeight: {
+                        'extrabold': 900, // For Playfair Display
+                    }
+                },
+            },
+        };
+    </script>
+
+    <!-- Custom Styles for Animations, Hexagons, and 3D Canvas -->
+    <style>
+        /* Base state for scroll-in animations */
+        .fade-in-element {
+            opacity: 0;
+            transform: translateY(20px);
+            transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+        }
+        
+        /* State when element is visible */
+        .is-visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* Custom clip-path for hexagons */
+        .hex-clip {
+            clip-path: polygon(25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%, 0% 50%);
+        }
+
+        /* NEW: 3D Canvas Style */
+        #bg-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100vh;
+            z-index: 0; /* Behind content */
+            opacity: 0;
+            transition: opacity 1s ease; /* Fade in */
+        }
+    </style>
+</head>
+<body class="bg-brand-light font-sans text-brand-dark antialiased">
+
+    <!-- Header (Sticky Nav Bar) -->
+    <header class="sticky top-0 z-50 w-full bg-white/90 shadow-md backdrop-blur-sm">
+        <nav class="container mx-auto grid max-w-6xl grid-cols-2 items-center gap-4 p-4 md:grid-cols-3">
+            <!-- Logo -->
+            <div class="text-2xl font-bold text-brand-primary font-serif justify-self-start">
+                <a href="#home-slider">Rejay's Ultra Glow</a>
+            </div>
+
+            <!-- Centered Nav Links (Desktop) -->
+            <div class="hidden justify-self-center md:flex space-x-6">
+                <a href="#home-slider" class="text-sm font-medium uppercase tracking-wider text-gray-600 hover:text-brand-primary transition-colors">Home</a>
+                <a href="#products" class="text-sm font-medium uppercase tracking-wider text-gray-600 hover:text-brand-primary transition-colors">Products</a>
+                <a href="#benefits" class="text-sm font-medium uppercase tracking-wider text-gray-600 hover:text-brand-primary transition-colors">Benefits</a>
+                <a href="#contact" class="text-sm font-medium uppercase tracking-wider text-gray-600 hover:text-brand-primary transition-colors">Contact</a>
+            </div>
+
+            <!-- Right-side Icons (Desktop) & Mobile Menu -->
+            <div class="flex items-center justify-self-end space-x-4">
+                <!-- Desktop Icons -->
+                <div class="hidden md:flex items-center space-x-4">
+                    <!-- Search Bar -->
+                    <div class="relative">
+                        <input type="text" placeholder="Search" class="rounded-full border-gray-300 py-1.5 pl-4 pr-8 text-sm focus:border-brand-primary focus:ring-brand-primary">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                        </svg>
+                    </div>
+                    <!-- Cart Icon -->
+                    <a href="#" class="text-gray-600 hover:text-brand-primary transition-colors">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
+                        </svg>
+                    </a>
+                </div>
+
+                <!-- Mobile Menu Button -->
+                <div class="md:hidden">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-brand-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7" />
+                    </svg>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <!-- NEW: 3D Canvas -->
+    <canvas id="bg-canvas"></canvas>
+
+    <!-- Main Content Wrapper (sits above canvas) -->
+    <main class="relative z-10">
+        
+        <!-- NEW: 3D Scroll-Driven Hero Section -->
+        <section id="home-slider" style="height: 400vh;" class="relative">
+            <!-- Sticky container to hold the text slides -->
+            <div class="sticky top-0 h-screen w-full overflow-hidden">
+                
+                <!-- Text for Slide 1 (Soap) -->
+                <div id="slide-text-1" class="absolute inset-0 flex flex-col items-center justify-center p-8 transition-opacity duration-500 ease-in-out opacity-0">
+                    <span class="text-sm font-medium uppercase tracking-widest text-theme-soap-fg">Cleansing Soap</span>
+                    <h1 class="text-6xl md:text-8xl font-extrabold text-theme-soap-fg text-center font-serif mt-2">Rejay's Soap</h1>
+                    <p class="text-lg text-brand-dark/70 mt-4 max-w-md text-center">Gentle cleansing for a brighter, more radiant complexion.</p>
+                </div>
+
+                <!-- Text for Slide 2 (Lotion) -->
+                <div id="slide-text-2" class="absolute inset-0 flex flex-col items-center justify-center p-8 transition-opacity duration-500 ease-in-out opacity-0">
+                    <span class="text-sm font-medium uppercase tracking-widest text-theme-lotion-fg">Hydrating Lotion</span>
+                    <h1 class="text-6xl md:text-8xl font-extrabold text-theme-lotion-fg text-center font-serif mt-2">Ultra Lotion</h1>
+                    <p class="text-lg text-brand-dark/70 mt-4 max-w-md text-center">Hydrating and nourishing for silky smooth, glowing skin.</p>
+                </div>
+
+                <!-- Text for Slide 3 (Serum) -->
+                <div id="slide-text-3" class="absolute inset-0 flex flex-col items-center justify-center p-8 transition-opacity duration-500 ease-in-out opacity-0">
+                    <span class="text-sm font-medium uppercase tracking-widest text-theme-serum-fg">Brightening Serum</span>
+                    <h1 class="text-6xl md:text-8xl font-extrabold text-theme-serum-fg text-center font-serif mt-2">Glow Serum</h1>
+                    <p class="text-lg text-brand-dark/70 mt-4 max-w-md text-center">Targeted treatment for a youthful, revitalized look.</p>
+                </div>
+
+                <!-- Text for Slide 4 (Cream) -->
+                <div id="slide-text-4" class="absolute inset-0 flex flex-col items-center justify-center p-8 transition-opacity duration-500 ease-in-out opacity-0">
+                    <span class="text-sm font-medium uppercase tracking-widest text-theme-cream-fg">Nourishing Cream</span>
+                    <h1 class="text-6xl md:text-8xl font-extrabold text-theme-cream-fg text-center font-serif mt-2">Nourish Cream</h1>
+                    <p class="text-lg text-brand-dark/70 mt-4 max-w-md text-center">Nourishing cream for a healthy, vibrant glow.</p>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- Products Section (Now scrolls over the 3D canvas) -->
+        <section id="products" class="py-16 md:py-24 bg-white">
+            <div class="container mx-auto max-w-6xl px-4">
+                <h2 class="fade-in-element text-center text-3xl font-bold text-brand-primary md:text-4xl font-serif">
+                    Our Products
+                </h2>
+                <div class="mt-12 grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-4">
+                    
+                    <!-- Product Card 1: Soap -->
+                    <div class="fade-in-element group overflow-hidden rounded-lg bg-white shadow-xl transition-all duration-300 hover:shadow-2xl flex flex-col">
+                        <div class="overflow-hidden">
+                            <img src="https://img.restaurantguru.com/reviews/original/1280158.jpg" alt="Ultra Glow Soap" class="h-64 w-full object-cover transition-transform duration-500 group-hover:scale-110">
+                        </div>
+                        <div class="p-6 flex flex-col flex-grow">
+                            <div class="flex-grow">
+                                <h3 class="text-2xl font-bold text-gray-800">Ultra Glow Soap</h3>
+                                <p class="mt-2 text-gray-600">Gentle cleansing for a brighter, more radiant complexion.</p>
+                            </div>
+                            <button data-product-id="soap" class="view-details-btn mt-4 rounded-full bg-brand-primary/10 px-5 py-2 font-medium text-brand-primary transition-colors hover:bg-brand-primary/20">
+                                View Details
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Product Card 2: Lotion -->
+                    <div class="fade-in-element group overflow-hidden rounded-lg bg-white shadow-xl transition-all duration-300 hover:shadow-2xl flex flex-col" style="transition-delay: 100ms;">
+                        <div class="overflow-hidden">
+                            <img src="https://www.rejusure.com/cdn/shop/files/zrxipmrr30ft2cffw8ie.jpg?v=1759220140&width=1946" alt="Ultra Glow Lotion" class="h-64 w-full object-cover transition-transform duration-500 group-hover:scale-110">
+                        </div>
+                        <div class="p-6 flex flex-col flex-grow">
+                            <div classs="flex-grow">
+                                <h3 class="text-2xl font-bold text-gray-800">Ultra Glow Lotion</h3>
+                                <p class="mt-2 text-gray-600">Hydrating and nourishing for silky smooth, glowing skin.</p>
+                            </div>
+                            <button data-product-id="lotion" class="view-details-btn mt-4 rounded-full bg-brand-primary/10 px-5 py-2 font-medium text-brand-primary transition-colors hover:bg-brand-primary/20">
+                                View Details
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Product Card 3: Serum -->
+                    <div class="fade-in-element group overflow-hidden rounded-lg bg-white shadow-xl transition-all duration-300 hover:shadow-2xl flex flex-col" style="transition-delay: 200ms;">
+                        <div class="overflow-hidden">
+                            <img src="https://ageofbeautyph.store/cdn/shop/files/ph-11134207-7r98q-lpt7uck2q8nj22.jpg?v=1710685857&width=1445" alt="Ultra Glow Serum" class="h-64 w-full object-cover transition-transform duration-500 group-hover:scale-110">
+                        </div>
+                        <div class="p-6 flex flex-col flex-grow">
+                            <div class="flex-grow">
+                                <h3 class="text-2xl font-bold text-gray-800">Ultra Glow Serum</h3>
+                                <p class="mt-2 text-gray-600">Targeted treatment for a youthful, revitalized look.</p>
+                            </div>
+                            <button data-product-id="serum" class="view-details-btn mt-4 rounded-full bg-brand-primary/10 px-5 py-2 font-medium text-brand-primary transition-colors hover:bg-brand-primary/20">
+                                View Details
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Product Card 4: Bleaching Soap -->
+                    <div class="fade-in-element group overflow-hidden rounded-lg bg-white shadow-xl transition-all duration-300 hover:shadow-2xl flex flex-col" style="transition-delay: 300ms;">
+                        <div class="overflow-hidden">
+                            <img src="https://milea.ph/cdn/shop/files/Milea_Glutathione_Cream.png?v=1723468614&width=2048" alt="Ultra Glow Cream" class="h-64 w-full object-cover transition-transform duration-500 group-hover:scale-110">
+                        </div>
+                        <div class="p-6 flex flex-col flex-grow">
+                            <div class="flex-grow">
+                                <h3 class="text-2xl font-bold text-gray-800">Ultra Glow Cream</h3>
+                                <p class="mt-2 text-gray-600">Nourishing cream for a healthy, vibrant glow.</p>
+                            </div>
+                            <button data-product-id="cream" class="view-details-btn mt-4 rounded-full bg-brand-primary/10 px-5 py-2 font-medium text-brand-primary transition-colors hover:bg-brand-primary/20">
+                                View Details
+                            </button>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </section>
+
+        <!-- Benefits Section (Now scrolls over the 3D canvas) -->
+        <section id="benefits" class="py-16 md:py-24 bg-brand-light">
+            <div class="container mx-auto max-w-6xl px-4">
+                <h2 class="fade-in-element text-center text-3xl font-bold text-brand-primary md:text-4xl font-serif">
+                    Experience the Benefits
+                </h2>
+                
+                <!-- Circular Icons Grid -->
+                <div class="mt-12 grid grid-cols-3 gap-6 text-center md:grid-cols-7 md:gap-8">
+                    
+                    <!-- Benefit Item -->
+                    <div class="fade-in-element flex flex-col items-center transition-transform duration-300 hover:scale-110">
+                        <div class="flex h-24 w-24 items-center justify-center rounded-full border-2 border-brand-secondary bg-white shadow-lg">
+                            <!-- SVG Icon: Water Drop -->
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 text-brand-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 22C6.477 22 2 17.523 2 12S6.477 2 12 2s10 4.477 10 10c0 2.146-.68 4.16-1.857 5.865a10.02 10.02 0 01-1.657 2.05A10.03 10.03 0 0112 22z" />
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 7v6l4 2" />
+                            </svg>
+                        </div>
+                        <span class="mt-3 block font-semibold text-gray-700">Skin Hydration</span>
+                    </div>
+
+                    <!-- Benefit Item -->
+                    <div class="fade-in-element flex flex-col items-center transition-transform duration-300 hover:scale-110" style="transition-delay: 50ms;">
+                        <div class="flex h-24 w-24 items-center justify-center rounded-full border-2 border-brand-secondary bg-white shadow-lg">
+                            <!-- SVG Icon: Shield -->
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 text-brand-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                            </svg>
+                        </div>
+                        <span class="mt-3 block font-semibold text-gray-700">Skin Barrier Function</span>
+                    </div>
+                    
+                    <!-- Benefit Item -->
+                    <div class="fade-in-element flex flex-col items-center transition-transform duration-300 hover:scale-110" style="transition-delay: 100ms;">
+                        <div class="flex h-24 w-24 items-center justify-center rounded-full border-2 border-brand-secondary bg-white shadow-lg">
+                            <!-- SVG Icon: Arrow Up -->
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 text-brand-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M5 10l7-7m0 0l7 7m-7-7v18" />
+                            </svg>
+                        </div>
+                        <span class="mt-3 block font-semibold text-gray-700">Skin Firming</span>
+                    </div>
+
+                    <!-- Benefit Item -->
+                    <div class="fade-in-element flex flex-col items-center transition-transform duration-300 hover:scale-110" style="transition-delay: 150ms;">
+                        <div class="flex h-24 w-24 items-center justify-center rounded-full border-2 border-brand-secondary bg-white shadow-lg">
+                            <!-- SVG Icon: Sparkles -->
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 text-brand-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
+                            </svg>
+                        </div>
+                        <span class="mt-3 block font-semibold text-gray-700">Aged Spots</span>
+                    </div>
+
+                    <!-- Benefit Item -->
+                    <div class="fade-in-element flex flex-col items-center transition-transform duration-300 hover:scale-110" style="transition-delay: 200ms;">
+                        <div class="flex h-24 w-24 items-center justify-center rounded-full border-2 border-brand-secondary bg-white shadow-lg">
+                            <!-- SVG Icon: Refresh -->
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 text-brand-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m-15.357-2A8.001 8.001 0 0019.418 15m0 0H15" />
+                            </svg>
+                        </div>
+                        <span class="mt-3 block font-semibold text-gray-700">Skin Renewal</span>
+                    </div>
+                    
+                    <!-- Benefit Item -->
+                    <div class="fade-in-element flex flex-col items-center transition-transform duration-300 hover:scale-110" style="transition-delay: 250ms;">
+                        <div class="flex h-24 w-24 items-center justify-center rounded-full border-2 border-brand-secondary bg-white shadow-lg">
+                            <!-- SVG Icon: Eye -->
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 text-brand-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                            </svg>
+                        </div>
+                        <span class="mt-3 block font-semibold text-gray-700">Dark Circles</span>
+                    </div>
+
+                    <!-- Benefit Item -->
+                    <div class="fade-in-element flex flex-col items-center transition-transform duration-300 hover:scale-110" style="transition-delay: 300ms;">
+                        <div class="flex h-24 w-24 items-center justify-center rounded-full border-2 border-brand-secondary bg-white shadow-lg">
+                            <!-- SVG Icon: Atom -->
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 text-brand-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 8c-1.657 0-3 1.343-3 3s1.343 3 3 3 3-1.343 3-3-1.343-3-3-3z" />
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M20.485 12c-1.02 4.18-4.63 7.5-8.485 7.5s-7.465-3.32-8.485-7.5c1.02-4.18 4.63-7.5 8.485-7.5s7.465 3.32 8.485 7.5z" />
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 12v.01" />
+                            </svg>
+                        </div>
+                        <span class="mt-3 block font-semibold text-gray-700">Anti Oxidation</span>
+                    </div>
+                </div>
+
+                <!-- Hexagon Grid (Image 2) -->
+                <div class="relative mx-auto mt-24 max-w-lg">
+                    <!-- Row 1 -->
+                    <div class="fade-in-element flex justify-center gap-2">
+                        <div class="hex-clip flex h-[104px] w-24 items-center justify-center bg-hex-beige p-2 text-center text-xs font-medium text-gray-700 shadow-md transition-transform duration-300 hover:scale-110" style="transition-delay: 100ms;">
+                            Skin Barrier Function
+                        </div>
+                        <div class="hex-clip flex h-[104px] w-24 items-center justify-center bg-hex-light-pink p-2 text-center text-xs font-medium text-gray-700 shadow-md transition-transform duration-300 hover:scale-110" style="transition-delay: 200ms;">
+                            Skin Firming
+                        </div>
+                    </div>
+                    <!-- Row 2 -->
+                    <div class="fade-in-element -mt-7 flex justify-center gap-2">
+                        <div class="hex-clip flex h-[104px] w-24 items-center justify-center bg-hex-brown p-2 text-center text-xs font-medium text-white shadow-md transition-transform duration-300 hover:scale-110" style="transition-delay: 300ms;">
+                            Aged Spots
+                        </div>
+                        <div class="hex-clip flex h-[104px] w-24 items-center justify-center bg-hex-dark-brown p-2 text-center text-xs font-medium text-white shadow-md transition-transform duration-300 hover:scale-110" style="transition-delay: 400ms;">
+                            Anti Oxidation
+                        </div>
+                    </div>
+                    <!-- Row 3 -->
+                    <div class="fade-in-element -mt-7 flex justify-center gap-2">
+                        <div class="hex-clip flex h-[104px] w-24 items-center justify-center bg-hex-light-pink p-2 text-center text-xs font-medium text-gray-700 shadow-md transition-transform duration-300 hover:scale-110" style="transition-delay: 500ms;">
+                            Skin Renewal
+                        </div>
+                        <div class="hex-clip flex h-[104px] w-24 items-center justify-center bg-hex-beige p-2 text-center text-xs font-medium text-gray-700 shadow-md transition-transform duration-300 hover:scale-110" style="transition-delay: 600ms;">
+                            Dark Circle & Puffy Eyes
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- Contact Section (Now scrolls over the 3D canvas) -->
+        <section id="contact" class="py-16 md:py-24 bg-white">
+            <div class="container mx-auto max-w-2xl px-4 text-center">
+                <h2 class="fade-in-element text-center text-3xl font-bold text-brand-primary md:text-4xl font-serif">
+                    Get in Touch
+                </h2>
+                <p class="fade-in-element mt-4 text-lg text-gray-600">
+                    Have questions? We'd love to hear from you.
+                </p>
+                <form class="fade-in-element mt-8 space-y-6 text-left">
+                    <div>
+                        <label for="name" class="block text-sm font-medium text-gray-700">Name</label>
+                        <input type="text" id="name" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-brand-primary focus:ring-brand-primary">
+                    </div>
+                    <div>
+                        <label for="email" class="block text-sm font-medium text-gray-700">Email</label>
+                        <input type="email" id="email" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-brand-primary focus:ring-brand-primary">
+                    </div>
+                    <div>
+                        <label for="message" class="block text-sm font-medium text-gray-700">Message</label>
+                        <textarea id="message" rows="4" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-brand-primary focus:ring-brand-primary"></textarea>
+                    </div>
+                    <div class="text-center">
+                        <button type="submit" class="rounded-full bg-brand-primary px-8 py-3 text-lg font-semibold text-white shadow-lg transition-all hover:bg-brand-primary/80 hover:scale-105">
+                            Send Message
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer (Now scrolls over the 3D canvas) -->
+    <footer class="bg-brand-secondary/50 py-8 relative z-10">
+        <div class="container mx-auto px-4 text-center text-gray-600">
+            <p>&copy; 2025 Rejay's Ultra Glow. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <!-- Product Modal (Unchanged) -->
+    <div id="productModal" class="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm transition-opacity duration-300 ease-in-out opacity-0 pointer-events-none">
+        <!-- Modal Content Box -->
+        <div id="modalBox" class="relative w-full max-w-2xl max-h-[90vh] overflow-y-auto bg-white rounded-lg shadow-2xl transition-all duration-300 ease-in-out transform scale-95 opacity-0">
+            <!-- Close Button -->
+            <button id="modalCloseBtn" class="absolute top-3 right-3 text-gray-400 hover:text-gray-700 transition-colors z-10">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+            </button>
+
+            <!-- Modal Content -->
+            <div class="p-6 md:p-8">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <!-- Product Image -->
+                    <div class="overflow-hidden rounded-lg">
+                        <img id="modalImage" src="https://placehold.co/600x600/fef1f5/ff69b4?text=Rejays+Soap" alt="Product Image" class="w-full h-full object-cover">
+                    </div>
+
+                    <!-- Product Details -->
+                    <div class="flex flex-col">
+                        <h3 id="modalTitle" class="text-3xl font-bold text-brand-primary font-serif mb-3">Ultra Glow Soap</h3>
+                        <p id="modalDescription" class="text-gray-600 mb-4">
+                            Gentle cleansing for a brighter, more radiant complexion.
+                        </p>
+                        
+                        <div class="space-y-4 text-sm">
+                            <div>
+                                <h4 class="font-semibold text-gray-800 mb-1">Key Ingredients</h4>
+                                <p id="modalIngredients" class="text-gray-600">
+                                    Niacinamide, Goat's Milk, Snail Serum Extract, Glutathione, Coconut Oil, Aqua, Sodium Hydroxide.
+                                </p>
+                            </div>
+                            <div>
+                                <h4 class="font-semibold text-gray-800 mb-1">How to Use</h4>
+                                <p id="modalHowToUse" class="text-gray-600">
+                                    Lather soap on wet skin. Gently massage for 1-2 minutes. Rinse thoroughly with water. Use daily for best results.
+                                </p>
+                            </div>
+                        </div>
+
+                        <button class="mt-6 w-full rounded-full bg-brand-primary px-8 py-3 font-semibold text-white shadow-lg transition-all hover:bg-brand-primary/80 hover:scale-105">
+                            Add to Cart
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- JavaScript for Animations and Modal -->
+    <script>
+        // Store product details in an object
+        const productDetails = {
+            'soap': {
+                name: 'Ultra Glow Soap',
+                image: 'https://img.restaurantguru.com/reviews/original/1280158.jpg',
+                description: 'Our signature glutathione soap, enriched with snail serum and goat\'s milk, gently exfoliates and cleanses to reveal brighter, smoother, and more radiant skin.',
+                ingredients: 'Niacinamide, Goat\'s Milk, Snail Serum Extract, Glutathione, Coconut Oil, Aqua, Sodium Hydroxide, Fragrance.',
+                howToUse: 'Lather soap on wet skin. Gently massage for 1-2 minutes, focusing on problem areas. Rinse thoroughly with water. Use daily for face and body for best results.'
+            },
+            'lotion': {
+                name: 'Ultra Glow Lotion',
+                image: 'https://www.rejusure.com/cdn/shop/files/zrxipmrr30ft2cffw8ie.jpg?v=1759220140&width=1946',
+                description: 'A luxurious, lightweight lotion that deeply hydrates and nourishes. Formulated to lock in moisture and improve skin elasticity for a silky, glowing finish.',
+                ingredients: 'Aqua, Glycerin, Niacinamide, Shea Butter, Goat\'s Milk Extract, Snail Serum Filtrate, Dimethicone, Fragrance, Phenoxyethanol.',
+                howToUse: 'Apply generously all over the body after bathing or whenever skin feels dry. Massage gently until fully absorbed. For best results, use with Ultra Glow Soap.'
+            },
+            'serum': {
+                name: 'Ultra Glow Serum',
+                image: 'https://ageofbeautyph.store/cdn/shop/files/ph-11134207-7r98q-lpt7uck2q8nj22.jpg?v=1710685857&width=1445',
+                description: 'A concentrated, fast-absorbing serum designed to target dark spots and uneven skin tone. Packed with active ingredients for a powerful brightening effect.',
+                ingredients: 'Aqua, Niacinamide, Hyaluronic Acid, Snail Serum Filtrate, Alpha Arbutin, Glutathione, Glycerin, Phenoxyethanol, Fragrance.',
+                howToUse: 'After cleansing and toning, apply a few drops to the face and neck. Gently pat into the skin until fully absorbed. Use morning and night before moisturizer.'
+            },
+            'cream': {
+                name: 'Ultra Glow Cream',
+                image: 'https://milea.ph/cdn/shop/files/Milea_Glutathione_Cream.png?v=1723468614&width=2048', // Corrected 'httpsD'
+                description: 'A rich, nourishing cream infused with Glutathione to hydrate, brighten, and protect your skin, leaving it soft and supple.',
+                ingredients: 'Aqua, Glutathione, Niacinamide, Shea Butter, Vitamin E, Glycerin, Phenoxyethanol, Fragrance.',
+                howToUse: 'After applying serum, take a small amount and gently massage onto face and neck in upward circular motions. Use morning and night.'
+            }
+        };
+
+        document.addEventListener('DOMContentLoaded', () => {
+            
+            // --- NEW 3D SCROLLING LOGIC ---
+            // Only run if Three.js is loaded
+            if (typeof THREE !== 'undefined') {
+                const scene = new THREE.Scene();
+                const canvas = document.getElementById('bg-canvas');
+                
+                // Camera
+                const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+                camera.position.z = 5;
+
+                // Renderer
+                const renderer = new THREE.WebGLRenderer({ canvas: canvas, alpha: true }); // alpha: true for transparent bg
+                renderer.setSize(window.innerWidth, window.innerHeight);
+                renderer.setPixelRatio(window.devicePixelRatio);
+
+                // Lights
+                const ambientLight = new THREE.AmbientLight(0xffffff, 0.8);
+                scene.add(ambientLight);
+                const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
+                directionalLight.position.set(5, 10, 7.5);
+                scene.add(directionalLight);
+
+                // --- NEW: Calculate visible height at camera Z ---
+                const fovInRadians = (camera.fov * Math.PI) / 180;
+                const visibleHeight = 2 * Math.tan(fovInRadians / 2) * camera.position.z;
+                // --- END NEW ---
+
+                // --- NEW: Function to create a circular vignette texture ---
+                function createVignetteTexture() {
+                    const canvas = document.createElement('canvas');
+                    canvas.width = 256;
+                    canvas.height = 256;
+                    const context = canvas.getContext('2d');
+                    // Create a radial gradient (center = white, edge = transparent)
+                    const gradient = context.createRadialGradient(
+                        canvas.width / 2, canvas.height / 2, 0,
+                        canvas.width / 2, canvas.height / 2, canvas.width / 2
+                    );
+                    // Make the solid center larger
+                    gradient.addColorStop(0.6, 'rgba(255,255,255,1)'); // 60% inner circle is solid
+                    gradient.addColorStop(1, 'rgba(255,255,255,0)'); // Fades to transparent
+                    
+                    context.fillStyle = gradient;
+                    context.fillRect(0, 0, canvas.width, canvas.height);
+                    return new THREE.CanvasTexture(canvas);
+                }
+                const alphaMapTexture = createVignetteTexture();
+                // --- END NEW FUNCTION ---
+
+                // Product Geometries (Planes for textures)
+                const productGroup = new THREE.Group();
+                
+                // --- NEW: Use visibleHeight to size planes to fit screen edge ---
+                // --- MODIFIED: All planes are now 1:1 (square) for a clean UX ---
+                const geometries = [
+                    // Soap (1:1 aspect ratio)
+                    new THREE.PlaneGeometry(visibleHeight, visibleHeight), 
+                    // Lotion (1:1 aspect ratio)
+                    new THREE.PlaneGeometry(visibleHeight, visibleHeight), 
+                    // Serum (1:1 aspect ratio)
+                    new THREE.PlaneGeometry(visibleHeight, visibleHeight), 
+                    // Cream (1:1 aspect ratio)
+                    new THREE.PlaneGeometry(visibleHeight, visibleHeight)    
+                ];
+
+                // Product Materials (using textures from productDetails)
+                const textureLoader = new THREE.TextureLoader();
+                const productTextures = [
+                    textureLoader.load(productDetails.soap.image),
+                    textureLoader.load(productDetails.lotion.image),
+                    textureLoader.load(productDetails.serum.image),
+                    textureLoader.load(productDetails.cream.image)
+                ];
+
+                const materials = productTextures.map(texture => {
+                    return new THREE.MeshStandardMaterial({
+                        map: texture,
+                        alphaMap: alphaMapTexture, // Apply the circular vignette
+                        roughness: 0.7,
+                        metalness: 0.2,
+                        transparent: true // Allows for PNG transparency if available
+                    });
+                });
+
+                // Create meshes and add to group
+                const productMeshes = materials.map((material, i) => {
+                    const mesh = new THREE.Mesh(geometries[i], material);
+                    mesh.visible = false; // Hide all initially
+                    productGroup.add(mesh);
+                    return mesh;
+                });
+
+                productMeshes[0].visible = true; // Show first product
+                scene.add(productGroup);
+
+                // Get scroll section and text slides
+                const scrollSection = document.getElementById('home-slider');
+                const slideTexts = [
+                    document.getElementById('slide-text-1'),
+                    document.getElementById('slide-text-2'),
+                    document.getElementById('slide-text-3'),
+                    document.getElementById('slide-text-4')
+                ];
+                const numSlides = slideTexts.length;
+                let lastSlideIndex = 0;
+
+                // Animation loop
+                function animate() {
+                    requestAnimationFrame(animate);
+                    renderer.render(scene, camera);
+                }
+                animate(); // Start the loop
+                canvas.style.opacity = 1; // Fade in canvas
+
+                // Scroll event listener
+                window.addEventListener('scroll', () => {
+                    const rect = scrollSection.getBoundingClientRect();
+                    const scrollPercent = -rect.top / (scrollSection.scrollHeight - window.innerHeight);
+                    
+                    if (scrollPercent >= 0 && scrollPercent <= 1) {
+                        // Calculate current slide
+                        const currentSlideIndex = Math.min(Math.floor(scrollPercent * numSlides), numSlides - 1);
+                        
+                        // Update text opacity
+                        if (currentSlideIndex !== lastSlideIndex) {
+                            slideTexts[lastSlideIndex].style.opacity = 0;
+                            slideTexts[currentSlideIndex].style.opacity = 1;
+                            
+                            // Update 3D model visibility
+                            productMeshes[lastSlideIndex].visible = false;
+                            productMeshes[currentSlideIndex].visible = true;
+
+                            lastSlideIndex = currentSlideIndex;
+                        }
+
+                        // --- NEW ANIMATION LOGIC ---
+                        // Calculate progress within the current "slide" (0 to 1)
+                        const slideProgress = (scrollPercent * numSlides) - currentSlideIndex;
+                        // Use a sine wave (0 -> 1 -> 0) for a smooth "bounce"
+                        const animProgress = Math.sin(slideProgress * Math.PI);
+
+                        // Animate scale (zooms in by 20% at mid-scroll and back)
+                        const scale = 1 + (animProgress * 0.2);
+                        productGroup.scale.set(scale, scale, scale);
+
+                        // Animate position (dips down slightly and comes back up)
+                        productGroup.position.y = animProgress * -0.5;
+
+                        // Keep it facing the camera
+                        productGroup.rotation.y = 0; // No rotation
+                        productGroup.rotation.x = 0; // No rotation
+                        camera.position.z = 5; // Keep camera static
+                        camera.position.y = 0; // Keep camera static
+                        // --- END NEW ANIMATION LOGIC ---
+
+                    } else if (scrollPercent < 0) {
+                        // Before start
+                        slideTexts[0].style.opacity = 1;
+                        productMeshes[0].visible = true;
+                        // Reset scale and position
+                        productGroup.scale.set(1, 1, 1);
+                        productGroup.position.y = 0;
+                    }
+                });
+
+                // Window resize listener
+                window.addEventListener('resize', () => {
+                    camera.aspect = window.innerWidth / window.innerHeight;
+                    camera.updateProjectionMatrix();
+                    renderer.setSize(window.innerWidth, window.innerHeight);
+                });
+            }
+
+            // --- EXISTING SCROLL FADE-IN OBSERVER ---
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('is-visible');
+                    }
+                });
+            }, {
+                threshold: 0.1 // Trigger when 10% of the element is visible
+            });
+
+            // Observe all elements with the 'fade-in-element' class
+            const elements = document.querySelectorAll('.fade-in-element');
+            elements.forEach(el => {
+                observer.observe(el);
+            });
+
+            // --- EXISTING MODAL FUNCTIONALITY ---
+            const modal = document.getElementById('productModal');
+            const modalBox = document.getElementById('modalBox');
+            const modalCloseBtn = document.getElementById('modalCloseBtn');
+            const detailButtons = document.querySelectorAll('.view-details-btn');
+
+            // Get modal content elements
+            const modalImage = document.getElementById('modalImage');
+            const modalTitle = document.getElementById('modalTitle');
+            const modalDescription = document.getElementById('modalDescription');
+            const modalIngredients = document.getElementById('modalIngredients');
+            const modalHowToUse = document.getElementById('modalHowToUse');
+
+            const openModal = (productId) => {
+                const product = productDetails[productId];
+                if (!product) return; // Exit if no product data
+
+                // Populate modal
+                modalImage.src = product.image;
+                modalImage.alt = product.name; // Set alt text for accessibility
+                modalTitle.textContent = product.name;
+                modalDescription.textContent = product.description;
+                modalIngredients.textContent = product.ingredients;
+                modalHowToUse.textContent = product.howToUse;
+
+                // Show modal with animation
+                modal.classList.remove('opacity-0', 'pointer-events-none');
+                modalBox.classList.remove('opacity-0', 'scale-95');
+                document.body.classList.add('overflow-hidden'); // Stop background scroll
+            };
+
+            const closeModal = () => {
+                // Hide modal with animation
+                modal.classList.add('opacity-0', 'pointer-events-none');
+                modalBox.classList.add('opacity-0', 'scale-95');
+                document.body.classList.remove('overflow-hidden'); // Re-enable background scroll
+            };
+
+            // Add event listeners
+            detailButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    openModal(button.dataset.productId);
+                });
+            });
+
+            modalCloseBtn.addEventListener('click', closeModal);
+            modal.addEventListener('click', (e) => {
+                // Close if overlay (modal background) is clicked, but not the box itself
+                if (e.target === modal) {
+                    closeModal();
+                }
+            });
+        });
+    </script>
+
+</body>
+</html>
+
+
+
+
+
+
